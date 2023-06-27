@@ -9,12 +9,12 @@ on:
 # Environment variables available to all jobs and steps in this workflow.
 env:
   DOCKER_IMAGE: gcr.io/green-grass-386401/captain:staging-${{ github.sha }}
-  GKE_PROJECT: 	green-grass-386401
+  GKE_PROJECT: green-grass-386401
   GKE_REGION: asia-northeast3
   GKE_CLUSTER: staging-cluster-1
   GKE_NAMESPACE: staging
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
-  GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GKE_SA_KEY }}
 
 jobs:
   setup-build-publish-deploy:
