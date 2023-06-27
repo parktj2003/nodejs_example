@@ -11,7 +11,7 @@ var server = http.createServer(function (request, response) {
 
 });
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 80;
 server.listen(port);
 
 // Put a friendly message on the terminal

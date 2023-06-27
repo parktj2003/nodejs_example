@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: gce
+    networking.gke.io/managed-certificates: staging-certs
+    networking.gke.io/v1.FrontendConfig: ssl-redirect
+  name: ingress
+  namespace: staging
+spec:
+  rules:
+    - host: staging.zuzu.network
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: app
+                port:
+                  number: 8080

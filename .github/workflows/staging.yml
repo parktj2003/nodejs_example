@@ -1,0 +1,79 @@
+# This workflow will build a docker container, publish it to Google Container
+# Registry, and deploy it to GKE.
+
+name: Build and Deploy to GKE
+
+on:
+  workflow_dispatch:
+
+# Environment variables available to all jobs and steps in this workflow.
+env:
+  DOCKER_IMAGE: gcr.io/captain-258411/captain:alpha-${{ github.sha }}
+  GKE_PROJECT: 	green-grass-386401
+  GKE_REGION: asia-northeast3
+  GKE_CLUSTER: staging-cluster-1
+  GKE_NAMESPACE: staging
+  GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
+  GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@v0
+        with:
+          version: "412.0.0"
+          service_account_email: ${{ secrets.GKE_EMAIL }}
+          service_account_key: ${{ secrets.GKE_KEY }}
+          install_components: "gke-gcloud-auth-plugin"
+
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      - name: Configure Docker credential helper
+        run: |
+          gcloud auth configure-docker
+
+      - name: Check whether it should build a Docker image
+        id: need-build
+        run: |
+          docker manifest inspect $DOCKER_IMAGE && echo "result=false" || echo "result=true" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and Publish
+        uses: docker/build-push-action@v2
+        if: steps.need-build.outputs.result == 'true'
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: ${{ env.DOCKER_IMAGE }}
+          push: true
+          build-args: |
+            ZUZU_VERSION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Set up Kustomize
+        working-directory: ./docker
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+
+      - name: Get cluster credentials
+        run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+          gcloud container clusters get-credentials $GKE_CLUSTER --region $GKE_REGION --project $GKE_PROJECT
+          kubectl config set-context --current --namespace $GKE_NAMESPACE
+
+      # Deploy the Docker image to the GKE cluster
+      - name: Deploy
+        working-directory: ./docker/alpha
+        run: |
+          ../kustomize edit set image captain=$DOCKER_IMAGE
+          ../kustomize build . | kubectl apply -f -
+          kubectl wait --for=condition=available --timeout=-1s deployments --all
+

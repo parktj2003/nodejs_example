@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: staging-certs
+  namespace: staging
+spec:
+  domains:
+    - staging.zuzu.network

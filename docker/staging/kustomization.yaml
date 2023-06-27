@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # TODO: https://github.com/kodebox-io/captain/issues/7651
+  # - app-worker.yaml
+  - app.yaml
+  - certs.yaml
