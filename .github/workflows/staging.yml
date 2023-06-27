@@ -14,7 +14,6 @@ env:
   GKE_CLUSTER: staging-cluster-1
   GKE_NAMESPACE: staging
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
-  GITHUB_TOKEN: ${{ secrets.GKE_SA_KEY }}
 
 jobs:
   setup-build-publish-deploy:
@@ -29,7 +28,7 @@ jobs:
         with:
           version: "412.0.0"
           service_account_email: ${{ secrets.GKE_EMAIL }}
-          service_account_key: ${{ secrets.GKE_KEY }}
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
           install_components: "gke-gcloud-auth-plugin"
 
       # Configure docker to use the gcloud command-line tool as a credential helper
