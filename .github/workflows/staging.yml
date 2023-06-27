@@ -8,7 +8,7 @@ on:
 
 # Environment variables available to all jobs and steps in this workflow.
 env:
-  DOCKER_IMAGE: gcr.io/captain-258411/captain:alpha-${{ github.sha }}
+  DOCKER_IMAGE: gcr.io/green-grass-386401/captain:staging-${{ github.sha }}
   GKE_PROJECT: 	green-grass-386401
   GKE_REGION: asia-northeast3
   GKE_CLUSTER: staging-cluster-1
