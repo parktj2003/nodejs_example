@@ -8,7 +8,7 @@ on:
 
 # Environment variables available to all jobs and steps in this workflow.
 env:
-  DOCKER_IMAGE: gcr.io/green-grass-386401/captain:staging-${{ github.sha }}
+  DOCKER_IMAGE: gcr.io/green-grass-386401/captain:staging
   GKE_PROJECT: green-grass-386401
   GKE_REGION: asia-northeast3
   GKE_CLUSTER: staging-cluster-1
@@ -52,10 +52,6 @@ jobs:
           file: ./Dockerfile
           tags: ${{ env.DOCKER_IMAGE }}
           push: true
-          build-args: |
-            ZUZU_VERSION=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Set up Kustomize
         working-directory: ./docker
